@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.pattern.apisignature" version="1.0.0">
-    <name>API Signature</name>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.pattern.signature" version="1.0.0">
+    <name>Signature</name>
     <description>This plugin provides an implementation of the SHA-256 hashing.</description>
     <author>Jakob Henner</author>
     <license>Apache 2.0 License</license>
