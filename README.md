@@ -1,4 +1,4 @@
-phonegap-api-signature-plugin
+API Signature
 =============================
 
 This plugin provides an implementation of SHA-256
@@ -13,12 +13,12 @@ cordova plugin add https://github.com/jakobhenner/phonegap-api-signature-plugin
 
 ## Usage
 ```
-// SHA-256
 <script>
     ApiSignature.createApiSignature(str, 'sha-256', function(sig){
       alert('Signature: ' + sig)
     });
 </script>
+```
 
 ## Insert ApiSignature Secret_Key
 ###### iOS
