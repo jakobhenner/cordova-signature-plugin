@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.setlevel.apisignature" version="1.0.0">
-    <name>ApiSignature</name>
-    <description>Phonegap/Cordova Api Signature plugin. This plugin provides an implementation of the (SHA-1, SHA-224, SHA-256, SHA-384, and SHA-512).</description>
-    <author>Dmitriy Devayev</author>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="com.pattern.apisignature" version="1.0.0">
+    <name>API Signature</name>
+    <description>This plugin provides an implementation of the SHA-256 hashing.</description>
+    <author>Jakob Henner</author>
     <license>Apache 2.0 License</license>
-    <keywords>phonegap,cordova,api signature, SHA-1, SHA-224, SHA-256, SHA-384, SHA-512</keywords>
-
+    <keywords>phonegap,cordova,api signature,SHA-256</keywords>
     <engines>
         <engine name="cordova" version=">=3.0" />
     </engines>
@@ -23,16 +22,5 @@
         </config-file>
         <header-file src="src/ios/CDVApiSignature.h" />
         <source-file src="src/ios/CDVApiSignature.m" />
-    </platform>
-
-    <!-- android -->
-    <platform name="android">
-        <config-file target="config.xml" parent="/*">
-            <feature name="CDVApiSignature" >
-                <param name="android-package" value="com.setlevel.apisignature.CDVApiSignature" onload="true" />
-            </feature>
-        </config-file>
-
-        <source-file src="src/android/CDVApiSignature.java" target-dir="src/com/setlevel/apisignature/" />
     </platform>
 </plugin>

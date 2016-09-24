@@ -3,6 +3,7 @@
 //  ApiSignatureTest
 //
 //  Created by Dmitriy Devayev on 12/11/14.
+//  Modified by Jakob Henner to implement proper sha256 hashing
 //
 //
 
@@ -10,10 +11,11 @@
 #import <Cordova/CDV.h>
 
 #include <CommonCrypto/CommonDigest.h>
+#import <CommonCrypto/CommonHMAC.h>
 
 @implementation CDVApiSignature
 
-NSString *secretKey = @"Secret_Key";
+NSString *secretKey = @"SECRET";
 
 - (void)createApiSignature:(CDVInvokedUrlCommand*)command
 {
@@ -22,20 +24,9 @@ NSString *secretKey = @"Secret_Key";
     NSString* hmac = [command.arguments objectAtIndex:1];
     
     if (message != nil && [message length] > 0) {
-        message = [message stringByAppendingString:secretKey];
-        
-        if([hmac isEqualToString:@"sha-1"]){
-            message = [self sha1: message];
-        } else if ([hmac isEqualToString:@"sha-224"]){
-            message = [self sha224: message];
-        } else if ([hmac isEqualToString:@"sha-256"]){
+        if ([hmac isEqualToString:@"sha-256"]){
             message = [self sha256: message];
-        } else if ([hmac isEqualToString:@"sha-384"]){
-            message = [self sha384: message];
-        } else if ([hmac isEqualToString:@"sha-512"]){
-            message = [self sha512: message];
         }
-        
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:message];
     } else {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
@@ -44,78 +35,19 @@ NSString *secretKey = @"Secret_Key";
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
--(NSString*) sha1:(NSString *)clear
-{
-    const char *s=[clear cStringUsingEncoding:NSASCIIStringEncoding];
-    NSData *keyData=[NSData dataWithBytes:s length:strlen(s)];
+-(NSString *) sha256 :(NSString *) data {
+    const char *cKey  = [secretKey cStringUsingEncoding:NSUTF8StringEncoding];
+    const char *cData = [data cStringUsingEncoding:NSUTF8StringEncoding];
+    unsigned char cHMAC[CC_SHA256_DIGEST_LENGTH];
+    CCHmac(kCCHmacAlgSHA256, cKey, strlen(cKey), cData, strlen(cData), cHMAC);
     
-    uint8_t digest[CC_SHA1_DIGEST_LENGTH]={0};
-    CC_SHA1(keyData.bytes, keyData.length, digest);
-    NSData *out=[NSData dataWithBytes:digest length:CC_SHA1_DIGEST_LENGTH];
-    NSString *hash=[out description];
-    hash = [hash stringByReplacingOccurrencesOfString:@" " withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@"<" withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@">" withString:@""];
-    return hash;
-}
-
--(NSString*) sha224:(NSString *)clear
-{
-    const char *s=[clear cStringUsingEncoding:NSASCIIStringEncoding];
-    NSData *keyData=[NSData dataWithBytes:s length:strlen(s)];
+    NSString *hash;
     
-    uint8_t digest[CC_SHA224_DIGEST_LENGTH]={0};
-    CC_SHA224(keyData.bytes, keyData.length, digest);
-    NSData *out=[NSData dataWithBytes:digest length:CC_SHA224_DIGEST_LENGTH];
-    NSString *hash=[out description];
-    hash = [hash stringByReplacingOccurrencesOfString:@" " withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@"<" withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@">" withString:@""];
-    return hash;
-}
-
--(NSString*) sha256:(NSString *)clear
-{
-    const char *s=[clear cStringUsingEncoding:NSASCIIStringEncoding];
-    NSData *keyData=[NSData dataWithBytes:s length:strlen(s)];
+    NSMutableString* output = [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
     
-    uint8_t digest[CC_SHA256_DIGEST_LENGTH]={0};
-    CC_SHA256(keyData.bytes, keyData.length, digest);
-    NSData *out=[NSData dataWithBytes:digest length:CC_SHA256_DIGEST_LENGTH];
-    NSString *hash=[out description];
-    hash = [hash stringByReplacingOccurrencesOfString:@" " withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@"<" withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@">" withString:@""];
-    return hash;
-}
-
--(NSString*) sha384:(NSString *)clear
-{
-    const char *s=[clear cStringUsingEncoding:NSASCIIStringEncoding];
-    NSData *keyData=[NSData dataWithBytes:s length:strlen(s)];
-    
-    uint8_t digest[CC_SHA384_DIGEST_LENGTH]={0};
-    CC_SHA384(keyData.bytes, keyData.length, digest);
-    NSData *out=[NSData dataWithBytes:digest length:CC_SHA384_DIGEST_LENGTH];
-    NSString *hash=[out description];
-    hash = [hash stringByReplacingOccurrencesOfString:@" " withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@"<" withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@">" withString:@""];
-    return hash;
-}
-
--(NSString*) sha512:(NSString *)clear
-{
-    const char *s=[clear cStringUsingEncoding:NSASCIIStringEncoding];
-    NSData *keyData=[NSData dataWithBytes:s length:strlen(s)];
-    
-    uint8_t digest[CC_SHA512_DIGEST_LENGTH]={0};
-    CC_SHA512(keyData.bytes, keyData.length, digest);
-    NSData *out=[NSData dataWithBytes:digest length:CC_SHA512_DIGEST_LENGTH];
-    NSString *hash=[out description];
-    hash = [hash stringByReplacingOccurrencesOfString:@" " withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@"<" withString:@""];
-    hash = [hash stringByReplacingOccurrencesOfString:@">" withString:@""];
+    for(int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++)
+        [output appendFormat:@"%02x", cHMAC[i]];
+    hash = output;
     return hash;
 }
 
